@@ -1,0 +1,26 @@
+{
+    "name": "dzaro/ai_prompter",
+    "description": "package allows developers to add various components that generate images via AI",
+    "autoload": {
+        "psr-4": {
+            "Dzaro\\AIPrompter\\": "src/"
+        }
+    },
+    "require": {
+        "openai-php/client": "^0.10.1",
+        "symfony/http-client": "^7.1",
+        "nyholm/psr7": "^1.8"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dzaro\\AIPrompter\\ImageGeneratorProvider"
+            ]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}
