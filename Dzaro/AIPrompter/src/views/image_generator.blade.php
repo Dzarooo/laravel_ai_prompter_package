@@ -86,9 +86,9 @@
     }
 
     @keyframes jump {
-        0% { transform: translateY(-8px); }
-        50% { transform: translateY(-11px); }
-        100% { transform: translateY(-8px); }
+        0% { transform: translate(0px, -8px); }
+        50% { transform: translate(3px, -8px); }
+        100% { transform: translate(0px, -8px); }
     }
 
     @media (max-width: 1600px) {
