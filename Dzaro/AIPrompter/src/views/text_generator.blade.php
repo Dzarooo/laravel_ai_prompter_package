@@ -2,7 +2,7 @@
 
 @section('AIPrompterStyle')
 <style>
-    body > div {
+    #mainContainer {
         width:40vw;
         min-width:200px;
         aspect-ratio:16/9;
@@ -28,7 +28,7 @@
         ) 1 100%;
     }
 
-    body > div > h2 {
+    #mainContainer > h2 {
         width:70%;
         text-align: center;
         height:100px;
@@ -36,14 +36,14 @@
         font-size: clamp(20px, 30px, 1.5vw);
     }
 
-    body > div > div {
+    #mainContainer > #inputContainer {
         width:100%;
         display:flex;
         justify-content:center;
         align-items: start;
     }
 
-    body > div > div > textarea {
+    #mainContainer > #inputContainer > textarea {
         appearance: none;
         background-color: transparent;
         width:70%;
@@ -58,11 +58,7 @@
         resize: none;
     }
 
-    body > div > div > div {
-        height:100px;
-    }
-
-    body > div > div > i {
+    #mainContainer > #inputContainer > i {
         font-size:30px;
         transform:translateY(-8px);
         background-image: radial-gradient(
@@ -73,10 +69,17 @@
         transition: --myColor1 0.1s;
     }
     
-    body > div > div > i:hover {
+    #mainContainer > #inputContainer > i:hover {
         cursor:pointer;
         animation:jump 0.5s;
         --myColor1: rgb(213, 213, 213);
+    }
+
+    #responseDiv {
+        min-height:100px;
+        height:100px;
+        width:calc(70% + 37px);
+        transition:height 0.3s ease-in-out;
     }
 
     @property --myColor1 {
@@ -92,7 +95,7 @@
     }
 
     @media (max-width: 1600px) {
-        body > div {
+        #mainContainer {
             width:80vw !important;
         }
     }
@@ -102,28 +105,59 @@
 
 @section('AIPrompterContent')
 
-    <div> <!-- main div -->
+    <div id="mainContainer"> <!-- main div -->
+        <div id="gridWrapper">
         <h2>Take your imagination to another level and write unlimited resources!</h2>
-        <div> <!-- div for aligning textarea and arrow horizontally -->
+        </div>
+        <div id="inputContainer"> <!-- div for aligning textarea and arrow horizontally -->
             <div></div> <!-- invisible div for making flex items position correctly -->
             <textarea id="promptInput" placeholder="Type something and watch magic happens..." oninput='if(this.scrollHeight < 300) {this.style.height = "";this.style.height = this.scrollHeight - 4 + "px"}'></textarea>
-            <i class="bi bi-arrow-right-short"></i>
+            <i onclick="askAI()" class="bi bi-arrow-right-short"></i>
         </div>
-        <div></div> <!-- invisible div for making flex items position correctly -->
+        <div id="responseDiv"><p id="responseParagraph"></p></div> <!-- invisible div for making flex items position correctly, after asking AI it becomes container for AI response -->
     </div>
 
     <script>
+        const messages = [];
 
         function listenForEnter(event) {
             if(event.keyCode === 13) {
                 event.preventDefault();
-                console.log("enter");
+                askAI();
             }
         }
 
+        function askAI() {
+            responseDiv.style.height = "100%";
+            responseParagraph.textContent = "Asking AI...";
+            messages.push({
+                "content": promptInput.value,
+                "role": "user"
+            })
+            console.log(messages);
+            $.ajax({
+                type:'POST',
+                url:"{{ route('AIPrompter_generate_text') }}",
+                data:{prompt:promptInput.value, messages:messages},
+                success:function(data){
+                    console.log(data.success);
+                    messages.push({
+                        "content": data.success.content,
+                        "role": "assistant"
+                    })
+                    responseParagraph.textContent = data.success.content;
+                }
+            });
+        }
+
+        
         (function() {
-            document.getElementById('promptInput').addEventListener('keypress', listenForEnter);
+            const promptInput = document.getElementById('promptInput');
+            promptInput.addEventListener('keypress', listenForEnter);
+            const responseDiv = document.getElementById('responseDiv');
+            const responseParagraph = document.getElementById('responseParagraph');
         })();
 
-</script>
+        </script>
+
 @endsection

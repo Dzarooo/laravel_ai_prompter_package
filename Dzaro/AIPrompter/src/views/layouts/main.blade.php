@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Prompter</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> 
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
@@ -63,13 +64,21 @@
             text-decoration-color:purple;
         }
 
+        #test {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
     </style>
     @yield('AIPrompterStyle')
 </head>
 <body> <!--has flex and center main div to the middle -->
     <header>
-        <p><a href="{{ route('AIPrompter_image_generator') }}" @class(['activeSite'=> request()->routeIs('AIPrompter_image_generator')])>Image Generator</a></p>
-        <p><a href="{{ route('AIPrompter_text_generator') }}" @class(['activeSite'=> request()->routeIs('AIPrompter_text_generator')])>Text Generator</a></p>
+        <div id="test">
+            <p><a href="{{ route('AIPrompter_image_generator') }}" @class(['activeSite'=> request()->routeIs('AIPrompter_image_generator')])>Image Generator</a></p>
+            <p><a href="{{ route('AIPrompter_text_generator') }}" @class(['activeSite'=> request()->routeIs('AIPrompter_text_generator')])>Text Generator</a></p>
+        </div>
     </header>
     @yield('AIPrompterContent')
     <footer></footer>

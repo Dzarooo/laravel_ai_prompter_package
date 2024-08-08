@@ -10,22 +10,20 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
 
 class AIController extends Controller {
-    public function generateText() {
+    public function generateText(Request $request) {
+        $prompt = $request->prompt;
+        $messages = $request->messages;
+
         $response = Http::withToken(Config::get('aiprompter.openai_api_key'))
         ->baseUrl('https://api.openai.com/v1')
         ->post('chat/completions', [
             "model" => "gpt-4o-mini",
-            "messages" => [
-                [
-                    "role" => "user",
-                    "content" => "what is php?"
-                ]
-            ]
+            "messages" => $messages
         ]);
 
     $data = $response->json();
     $message = $data['choices'][0]['message'];
-    dd($message);
+    return response()->json(['success'=>$message]);
     }
 
     public function whyyoudothis() {

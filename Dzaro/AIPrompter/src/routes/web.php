@@ -9,4 +9,4 @@ Route::get('/image_generator', [ImageGeneratorController::class, 'show'])->name(
 
 Route::get('/text_generator', [TextGeneratorController::class, 'show'])->name('AIPrompter_text_generator');
 
-Route::get('/test_text', [AIController::class, 'generateText'])->name('AIPrompter_test_text');
+Route::post('/text_generator', [AIController::class, 'generateText'])->name('AIPrompter_generate_text');
