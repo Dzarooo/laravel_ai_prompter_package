@@ -21,12 +21,25 @@ class AIController extends Controller {
             "messages" => $messages
         ]);
 
-    $data = $response->json();
-    $message = $data['choices'][0]['message'];
-    return response()->json(['success'=>$message]);
+        $data = $response->json();
+        $message = $data['choices'][0]['message'];
+        return response()->json(['success'=>$message]);
     }
 
-    public function whyyoudothis() {
-        echo "This is a test function for generating AI text.";
+
+    public function generateImages(Request $request) {
+        $prompt = $request->prompt;
+
+        $response = Http::withToken(Config::get('aiprompter.openai_api_key'))
+        ->baseUrl('https://api.openai.com/v1')
+        ->post('images/generations', [
+            "prompt" => $prompt,
+            "model" => "dall-e-2",
+            "size" => "256x256",
+            "n" => 1,
+        ]);
+
+        $data = $response->json();
+        return response()->json(['success'=>$data]);
     }
 }

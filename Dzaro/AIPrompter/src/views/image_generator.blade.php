@@ -2,7 +2,7 @@
 
 @section('AIPrompterStyle')
 <style>
-    body > div {
+    #mainContainer {
         width:40vw;
         min-width:200px;
         aspect-ratio:16/9;
@@ -16,8 +16,8 @@
         flex-direction: column;
         align-items: center;
         height:100%;
-        justify-content: center;
-        gap:10%;
+        justify-content: space-between;
+        gap:1%;
         border-width: 3px;
         border-style: solid;
         border-image:
@@ -28,22 +28,40 @@
         ) 1 100%;
     }
 
-    body > div > h2 {
+    #mainContainer > #titleWrapper {
+        display: grid;
+        grid-template-rows: 1fr;
+        overflow: hidden;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    #mainContainer > #titleWrapper > div {
+        display: flex;
+        justify-content: center;
+        overflow-x: scroll; 
+        scrollbar-width: none; 
+        -ms-overflow-style: none; 
+        scroll-behavior: smooth;
+    }
+
+    #mainContainer > #titleWrapper h2 {
         width:70%;
         text-align: center;
         height:100px;
         transition: all 0.3 ease-in-out;
         font-size: clamp(20px, 30px, 1.5vw);
+        transition: opacity 0.2s, transform 0.5s;
     }
 
-    body > div > div {
+    #mainContainer > #inputContainer {
         width:100%;
         display:flex;
         justify-content:center;
         align-items: start;
     }
 
-    body > div > div > textarea {
+    #mainContainer > #inputContainer > textarea {
         appearance: none;
         background-color: transparent;
         width:70%;
@@ -58,11 +76,7 @@
         resize: none;
     }
 
-    body > div > div > div {
-        height:100px;
-    }
-
-    body > div > div > i {
+    #mainContainer > #inputContainer > i {
         font-size:30px;
         transform:translateY(-8px);
         background-image: radial-gradient(
@@ -73,10 +87,65 @@
         transition: --myColor1 0.1s;
     }
     
-    body > div > div > i:hover {
+    #mainContainer > #inputContainer > i:hover {
         cursor:pointer;
         animation:jump 0.5s;
         --myColor1: rgb(213, 213, 213);
+    }
+
+    #responseDiv {
+        min-height:100px;
+        height:100px;
+        width:calc(70% + 37px);
+        transition:height 0.3s ease-in-out;
+        display:flex;
+        justify-items:center;
+    }
+
+    #responseDiv > p {
+        width:100%;
+        display:none;
+    }
+
+    #responseDiv #loadingContainer {
+        display:none;
+        justify-content: center;
+        align-items: center;
+        gap:7px;
+        width:100%;
+        height:100%;
+    }
+
+    #responseDiv #loadingContainer .loadingDot {
+        width:20px;
+        height:20px;
+        background-color:rgb(191, 191, 191);
+        border-radius: 50%;
+        opacity:0;
+        scale:50%;
+    }
+
+    #responseDiv #loadingContainer .loadingDot:nth-child(1) {
+        animation: loadingDot 1s ease-in-out infinite;
+        animation-delay: 0s;
+    }
+
+    #responseDiv #loadingContainer .loadingDot:nth-child(2) {
+        animation: loadingDot 1s ease-in-out infinite;
+        animation-delay: 0.25s;
+    }
+
+    #responseDiv #loadingContainer .loadingDot:nth-child(3) {
+        animation: loadingDot 1s ease-in-out infinite;
+        animation-delay: 0.5s;
+    }
+
+    #responseDiv #responseDivImages {
+        width:100%;
+        display:flex;
+        justify-content: center;
+        gap:20px;
+        flex-wrap:wrap;
     }
 
     @property --myColor1 {
@@ -91,8 +160,15 @@
         100% { transform: translate(0px, -8px); }
     }
 
+    @keyframes loadingDot {
+        0% { opacity:0; scale:50% }
+        25% { opacity:1; scale:100% }
+        75% { opacity:0; scale:50% }
+        100% { opacity:0; scale:50% }
+    }
+
     @media (max-width: 1600px) {
-        body > div {
+        #mainContainer {
             width:80vw !important;
         }
     }
@@ -102,28 +178,92 @@
 
 @section('AIPrompterContent')
 
-    <div> <!-- main div -->
-        <h2>Take your imagination to another level and get this prompt rolling!</h2>
-        <div> <!-- div for aligning textarea and arrow horizontally -->
+    <div id="mainContainer"> <!-- main div -->
+        <div id="titleWrapper">
+            <div>
+                <h2>Take your imagination to another level and get this prompt rolling!</h2>
+            </div>
+        </div>
+        <div id="inputContainer"> <!-- div for aligning textarea and arrow horizontally -->
             <div></div> <!-- invisible div for making flex items position correctly -->
             <textarea id="promptInput" placeholder="Type something and watch magic happens..." oninput='if(this.scrollHeight < 300) {this.style.height = "";this.style.height = this.scrollHeight - 4 + "px"}'></textarea>
-            <i class="bi bi-arrow-right-short"></i>
+            <i onclick="askAI()" class="bi bi-arrow-right-short"></i>
         </div>
-        <div></div> <!-- invisible div for making flex items position correctly -->
+        <div id="responseDiv"> <!-- invisible div for making flex items position correctly, after asking AI it becomes container for AI response -->
+            <div id="loadingContainer">
+                <div class="loadingDot"></div>
+                <div class="loadingDot"></div>
+                <div class="loadingDot"></div>
+            </div>
+            <div id="responseDivImages"></div>
+        </div> 
     </div>
 
     <script>
 
+        /* all variables in script */
+        const responseDiv = document.getElementById('responseDiv');
+        const responseDivImages = document.getElementById('responseDivImages');
+        const promptInput = document.getElementById('promptInput');
+        const titleWrapper = document.getElementById('titleWrapper')
+        const title = document.querySelector('#titleWrapper h2');
+        const loadingContainer = document.getElementById('loadingContainer');
+        let isStyled = false;
+        promptInput.addEventListener('keypress', listenForEnter);
+
+        /* listening for enter in textarea */
         function listenForEnter(event) {
             if(event.keyCode === 13) {
                 event.preventDefault();
-                console.log("enter");
+                askAI();
             }
         }
 
-        (function() {
-            document.getElementById('promptInput').addEventListener('keypress', listenForEnter);
-        })();
+        /* style container (remove title) when user give prompt the first time */
+        function styleContainer() {
+            titleWrapper.style.gridTemplateRows = "0fr";
+            title.style.opacity = 0;
+            title.style.transform = "translateY(-100px)";
+            responseDiv.style.height = "100%";
 
-</script>
+            /* prevent askAI function to going into this function all over again */
+            isStyled = true;
+        }
+        
+        /* send ajax with user prompt to laravel route and return AI response */
+        function askAI() {
+            /* clear prompt after sending message */
+            let prompt = promptInput.value;
+            promptInput.value = "";
+
+            /* some style... */
+            if(!isStyled) {
+                styleContainer()
+            }
+            responseDivImages.style.display = "none";
+            loadingContainer.style.display = "flex";
+
+            /* the ajax itself */
+            $.ajax({
+                type:'POST',
+                url:"{{ route('AIPrompter_generate_images') }}",
+                data:{prompt:prompt},
+                success:function(data){
+                    /* display AI response */
+                    loadingContainer.style.display = "none";
+                    responseDivImages.innerHTML = "";
+                    responseDivImages.style.display = "flex";
+                    /* responseDivImages.textContent = data.success.content; */
+                    console.log(data.success.data);
+                    let response = data.success.data;
+                    Array.from(response).forEach((image) => {
+                        console.log(image.url);
+                        responseDivImages.innerHTML += `<img src="${image.url}" alt="AI generated image" style="width:256px;height:256px;">`;
+                    })
+                }
+            });
+        }
+
+        </script>
+
 @endsection
