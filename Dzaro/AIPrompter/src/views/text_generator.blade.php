@@ -96,6 +96,7 @@
     #responseDiv {
         min-height:100px;
         height:100px;
+        overflow-y: auto;
         width:calc(70% + 37px);
         transition:height 0.3s ease-in-out;
         display:flex;
