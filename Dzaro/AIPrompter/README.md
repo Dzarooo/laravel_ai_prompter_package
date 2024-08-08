@@ -9,7 +9,7 @@ then, go to composer.json and add this block of code to your repositories sectio
 "repositories": [
     {
         "type": "path",
-        "url": "packages/Dzaro/ImageGenerator",
+        "url": "packages/Dzaro/AIPrompter",
         "options": {
             "symlink": true
         }
@@ -42,7 +42,7 @@ After that, make sure you have added provider in `bootstrap/providers.php` as sh
 
 return [
     //your providers...
-    Dzaro\ImageGenerator\ImageGeneratorProvider::class,
+    Dzaro\AIPrompter\providers\AIPrompterProvider::class,
 ];
 ```
 
@@ -63,15 +63,8 @@ More informations about how to get OpenAI API key can be found [there](https://h
 
 # How to use the package
 
-To use the package, add these lines of code to your web.php:
+After properly configuring the package, you have 2 new already configured routes to use:
+- `/text_generator`,
+- `/image_generator`
 
-```php
-//web.php
-
-use Dzaro\ImageGenerator\Controllers\ImageGeneratorController;
-
-Route::get('your_route', [ImageGeneratorController::class, 'show']);
-```
-
-...where "your_route" is the route where you want image generator to be.<br>
-This route is simply redirecting to blade.php file in which functionality of package can be accessed.
+Use them as you wish!
