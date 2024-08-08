@@ -16,8 +16,8 @@
         flex-direction: column;
         align-items: center;
         height:100%;
-        justify-content: center;
-        gap:10%;
+        justify-content: space-between;
+        gap:1%;
         border-width: 3px;
         border-style: solid;
         border-image:
@@ -28,12 +28,30 @@
         ) 1 100%;
     }
 
-    #mainContainer > h2 {
+    #mainContainer > #titleWrapper {
+        display: grid;
+        grid-template-rows: 1fr;
+        overflow: hidden;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    #mainContainer > #titleWrapper > div {
+        display: flex;
+        justify-content: center;
+        overflow-x: scroll; 
+        scrollbar-width: none; 
+        -ms-overflow-style: none; 
+        scroll-behavior: smooth;
+    }
+
+    #mainContainer > #titleWrapper h2 {
         width:70%;
         text-align: center;
         height:100px;
         transition: all 0.3 ease-in-out;
         font-size: clamp(20px, 30px, 1.5vw);
+        transition: opacity 0.2s, transform 0.5s;
     }
 
     #mainContainer > #inputContainer {
@@ -106,8 +124,10 @@
 @section('AIPrompterContent')
 
     <div id="mainContainer"> <!-- main div -->
-        <div id="gridWrapper">
-        <h2>Take your imagination to another level and write unlimited resources!</h2>
+        <div id="titleWrapper">
+            <div>
+                <h2>Take your imagination to another level and write unlimited resources!</h2>
+            </div>
         </div>
         <div id="inputContainer"> <!-- div for aligning textarea and arrow horizontally -->
             <div></div> <!-- invisible div for making flex items position correctly -->
@@ -118,8 +138,16 @@
     </div>
 
     <script>
+        /* all variables in script */
         const messages = [];
+        const responseDiv = document.getElementById('responseDiv');
+        const responseParagraph = document.getElementById('responseParagraph');
+        const promptInput = document.getElementById('promptInput');
+        const titleWrapper = document.getElementById('titleWrapper')
+        const title = document.querySelector('#titleWrapper h2');
+        promptInput.addEventListener('keypress', listenForEnter);
 
+        /* listening for enter in textarea */
         function listenForEnter(event) {
             if(event.keyCode === 13) {
                 event.preventDefault();
@@ -127,36 +155,37 @@
             }
         }
 
+        /* send ajax with user prompt to laravel route and return AI response */
         function askAI() {
+            /* some style... */
+            titleWrapper.style.gridTemplateRows = "0fr";
+            title.style.opacity = 0;
+            title.style.transform = "translateY(-100px)";
             responseDiv.style.height = "100%";
             responseParagraph.textContent = "Asking AI...";
+            /* updating messages table */
             messages.push({
                 "content": promptInput.value,
                 "role": "user"
             })
             console.log(messages);
+            /* the ajax itself */
             $.ajax({
                 type:'POST',
                 url:"{{ route('AIPrompter_generate_text') }}",
                 data:{prompt:promptInput.value, messages:messages},
                 success:function(data){
                     console.log(data.success);
+                    /* updating messages table */
                     messages.push({
                         "content": data.success.content,
                         "role": "assistant"
                     })
+                    /* display AI response */
                     responseParagraph.textContent = data.success.content;
                 }
             });
         }
-
-        
-        (function() {
-            const promptInput = document.getElementById('promptInput');
-            promptInput.addEventListener('keypress', listenForEnter);
-            const responseDiv = document.getElementById('responseDiv');
-            const responseParagraph = document.getElementById('responseParagraph');
-        })();
 
         </script>
 
