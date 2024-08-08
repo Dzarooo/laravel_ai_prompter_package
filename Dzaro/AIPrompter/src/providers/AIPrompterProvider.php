@@ -1,6 +1,6 @@
 <?php
 
-namespace Dzaro\AIPrompter;
+namespace Dzaro\AIPrompter\providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
@@ -18,9 +18,9 @@ class AIPrompterProvider extends ServiceProvider {
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/config/aiprompter.php' => config_path('aiprompter.php'),
+            __DIR__.'/../config/aiprompter.php' => config_path('aiprompter.php'),
         ]);
-        $this->loadViewsFrom(__DIR__.'/views', 'views');
-        $this->loadRoutesFrom(__DIR__.'/routes/web.php');
+        $this->loadViewsFrom(__DIR__.'/../views', 'views');
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
     }
 }
