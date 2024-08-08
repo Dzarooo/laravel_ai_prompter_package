@@ -29,17 +29,23 @@ class AIController extends Controller {
 
     public function generateImages(Request $request) {
         $prompt = $request->prompt;
+        $imageSize = $request->imageSize;
+        $imageSize = $imageSize."x".$imageSize;
+        $imagesAmount = Intval($request->imagesAmount);
+
 
         $response = Http::withToken(Config::get('aiprompter.openai_api_key'))
         ->baseUrl('https://api.openai.com/v1')
         ->post('images/generations', [
             "prompt" => $prompt,
             "model" => "dall-e-2",
-            "size" => "256x256",
-            "n" => 1,
+            "size" => $imageSize,
+            "n" => $imagesAmount,
         ]);
 
         $data = $response->json();
         return response()->json(['success'=>$data]);
+
+        //return response()->json(['success'=>compact('prompt','imageSize','imagesAmount')]);
     }
 }

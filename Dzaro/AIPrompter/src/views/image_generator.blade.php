@@ -54,17 +54,24 @@
         transition: opacity 0.2s, transform 0.5s;
     }
 
-    #mainContainer > #inputContainer {
+    #mainContainer > #inputMainContainer {
         width:100%;
+        display:flex;
+        align-items:center;
+        flex-direction: column;
+    }
+
+    #mainContainer > #inputMainContainer > #inputContainer {
+        width:70%;
         display:flex;
         justify-content:center;
         align-items: start;
     }
 
-    #mainContainer > #inputContainer > textarea {
+    #mainContainer > #inputMainContainer > #inputContainer > textarea {
         appearance: none;
         background-color: transparent;
-        width:70%;
+        width:100%;
         border:solid;
         border-color:transparent;
         border-bottom-color:grey;
@@ -76,7 +83,7 @@
         resize: none;
     }
 
-    #mainContainer > #inputContainer > i {
+    #mainContainer > #inputMainContainer > #inputContainer > i {
         font-size:30px;
         transform:translateY(-8px);
         background-image: radial-gradient(
@@ -87,10 +94,69 @@
         transition: --myColor1 0.1s;
     }
     
-    #mainContainer > #inputContainer > i:hover {
+    #mainContainer > #inputMainContainer > #inputContainer > i:hover {
         cursor:pointer;
         animation:jump 0.5s;
         --myColor1: rgb(213, 213, 213);
+    }
+
+    #mainContainer > #inputMainContainer > #inputOptions {
+        width:70%;
+        display:flex;
+        gap:20px;
+    }
+
+    #mainContainer > #inputMainContainer > #inputOptions > div {
+        display:flex;
+        align-items:center;
+        gap:5px;
+    }
+
+    #mainContainer > #inputMainContainer > #inputOptions > div p {
+        margin:0;
+        padding:0;
+        font-size:12px;
+    }
+
+    #mainContainer > #inputMainContainer > #inputOptions > div:nth-child(1) > input {
+        font-family: 'Poppins', sans-serif;
+        width:20px;
+        height:20px;
+        border:none;
+        text-align:center;
+        border-radius:1000000px;
+        background-color:rgb(224, 224, 224);
+        outline:none;
+        box-shadow:inset 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+        font-weight:300;
+    }
+
+    #mainContainer > #inputMainContainer > #inputOptions > div:nth-child(2) > div {
+        font-family: 'Poppins', sans-serif;
+        height:20px;
+        border:none;
+        text-align:center;
+        border-radius:1000000px;
+        background-color:rgb(224, 224, 224);
+        outline:none;
+        box-shadow:inset 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+        font-weight:300;
+        padding:1px 5px 1px 5px;
+        display:flex;
+        align-items:center;
+        justify-content: center;
+        gap:3px;
+        user-select:none;
+    }
+
+    #mainContainer > #inputMainContainer > #inputOptions > div:nth-child(2) > div > div {
+        width:40px;
+        height:16px;
+        border-radius:100000px;
+        cursor:pointer;
+        font-weight:300;
+        font-size:12px;
+        transition: background-color 0.1s ease-in-out;
     }
 
     #responseDiv {
@@ -148,6 +214,24 @@
         flex-wrap:wrap;
     }
 
+    .activeImageSize {
+        background-color:white;
+    }
+
+    /* remove arrows from input type number */
+    /* Chrome, Safari, Edge, Opera */
+    input:is(#mainContainer > #inputMainContainer > #inputOptions > div:nth-child(1) > input)::-webkit-outer-spin-button,
+    input:is(#mainContainer > #inputMainContainer > #inputOptions > div:nth-child(1) > input)::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input:is(#mainContainer > #inputMainContainer > #inputOptions > div:nth-child(1) > input)[type=number] {
+        appearance: textfield;
+        -moz-appearance: textfield;
+    }
+
     @property --myColor1 {
         syntax: '<color>';
         initial-value: transparent;
@@ -184,10 +268,27 @@
                 <h2>Take your imagination to another level and get this prompt rolling!</h2>
             </div>
         </div>
-        <div id="inputContainer"> <!-- div for aligning textarea and arrow horizontally -->
-            <div></div> <!-- invisible div for making flex items position correctly -->
-            <textarea id="promptInput" placeholder="Type something and watch magic happens..." oninput='if(this.scrollHeight < 300) {this.style.height = "";this.style.height = this.scrollHeight - 4 + "px"}'></textarea>
-            <i onclick="askAI()" class="bi bi-arrow-right-short"></i>
+        <div id="inputMainContainer"> <!-- div for aligning prompt input and options vertically -->
+            <div id="inputContainer"> <!-- div for aligning textarea and arrow horizontally -->
+                <div></div> <!-- invisible div for making flex items position correctly -->
+                <textarea id="promptInput" placeholder="Type something and watch magic happens..." oninput='if(this.scrollHeight < 300) {this.style.height = "";this.style.height = this.scrollHeight - 4 + "px"}'></textarea>
+                <i onclick="askAI()" class="bi bi-arrow-right-short"></i>
+            </div>
+            <div id="inputOptions"> <!-- container for options: image size and images amount -->
+                <div>
+                    <p>How many:</p>
+                    <input id="imagesAmount" type="number" value="1" min="1" max="10">
+                </div>
+                <div>
+                    <p>Size:</p>
+                    <div>
+                        <div class="sizeOption activeImageSize">256</div>
+                        <div class="sizeOption">512</div>
+                        <div class="sizeOption">1024</div>
+                    </div>
+                    <p>px</p>
+                </div>
+            </div>
         </div>
         <div id="responseDiv"> <!-- invisible div for making flex items position correctly, after asking AI it becomes container for AI response -->
             <div id="loadingContainer">
@@ -208,8 +309,17 @@
         const titleWrapper = document.getElementById('titleWrapper')
         const title = document.querySelector('#titleWrapper h2');
         const loadingContainer = document.getElementById('loadingContainer');
+        const sizeOptions = document.getElementsByClassName('sizeOption');
+        const imagesAmountInput = document.getElementById('imagesAmount');
         let isStyled = false;
+        let imageSize = 256;
+        let imagesAmount = 1;
+
+        /* add event listeners */
         promptInput.addEventListener('keypress', listenForEnter);
+        Array.from(sizeOptions).forEach(option => option.addEventListener('click', setNewSize));
+        imagesAmountInput.addEventListener('input', updateImagesAmount);
+        imagesAmountInput.addEventListener('focusout', checkImagesAmount);
 
         /* listening for enter in textarea */
         function listenForEnter(event) {
@@ -217,6 +327,28 @@
                 event.preventDefault();
                 askAI();
             }
+        }
+
+        /* set new amount of images if user types in images amount input */
+        function updateImagesAmount() {
+            imagesAmount = parseInt(imagesAmountInput.value);
+        }
+
+        /* when user leaves images amount input validate the new value */
+        function checkImagesAmount() {
+            if(isNaN(imagesAmount) || imagesAmount < 1) {
+                imagesAmountInput.value = 1;
+            }
+            else if(imagesAmount > 10) {
+                imagesAmountInput.value = 10;
+            }
+        }
+
+        /* set new Size of images on click of any size option */
+        function setNewSize(e) {
+            imageSize = parseInt(e.target.innerHTML);
+            Array.from(sizeOptions).forEach(option => option.classList.remove('activeImageSize'));
+            e.target.classList.add('activeImageSize');
         }
 
         /* style container (remove title) when user give prompt the first time */
@@ -232,6 +364,12 @@
         
         /* send ajax with user prompt to laravel route and return AI response */
         function askAI() {
+            /* check if input is empty */
+            if(promptInput.value === "") {
+                console.warn("Input for prompt cannot be empty!");
+                return;
+            }
+
             /* clear prompt after sending message */
             let prompt = promptInput.value;
             promptInput.value = "";
@@ -247,19 +385,19 @@
             $.ajax({
                 type:'POST',
                 url:"{{ route('AIPrompter_generate_images') }}",
-                data:{prompt:prompt},
+                data:{prompt:prompt, imageSize:imageSize, imagesAmount:imagesAmount},
                 success:function(data){
                     /* display AI response */
                     loadingContainer.style.display = "none";
                     responseDivImages.innerHTML = "";
                     responseDivImages.style.display = "flex";
-                    /* responseDivImages.textContent = data.success.content; */
-                    console.log(data.success.data);
+                    
+                    console.info("images successfully obtained: ", data.success.data);
                     let response = data.success.data;
                     Array.from(response).forEach((image) => {
-                        console.log(image.url);
                         responseDivImages.innerHTML += `<img src="${image.url}" alt="AI generated image" style="width:256px;height:256px;">`;
                     })
+
                 }
             });
         }
