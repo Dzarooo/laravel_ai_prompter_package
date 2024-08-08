@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
+use Parsedown;
 
 class AIController extends Controller {
     public function generateText(Request $request) {
@@ -23,6 +24,12 @@ class AIController extends Controller {
 
         $data = $response->json();
         $message = $data['choices'][0]['message'];
+
+        $Parsedown = new Parsedown();
+        $formattedMessageContent = $Parsedown->text($message['content']);
+        
+        $message['content'] = $formattedMessageContent;
+
         return response()->json(['success'=>$message]);
     }
 

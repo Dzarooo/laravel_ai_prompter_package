@@ -40,7 +40,7 @@ class ComposerStaticInit5f84b1177b67fade37b18ae68cb61d35
         ),
         'D' => 
         array (
-            'Dzaro\\ImageGenerator\\' => 21,
+            'Dzaro\\AIPrompter\\' => 17,
         ),
     );
 
@@ -90,9 +90,19 @@ class ComposerStaticInit5f84b1177b67fade37b18ae68cb61d35
         array (
             0 => __DIR__ . '/..' . '/php-http/discovery/src',
         ),
-        'Dzaro\\ImageGenerator\\' => 
+        'Dzaro\\AIPrompter\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
+        ),
+    );
+
+    public static $prefixesPsr0 = array (
+        'P' => 
+        array (
+            'Parsedown' => 
+            array (
+                0 => __DIR__ . '/..' . '/erusev/parsedown',
+            ),
         ),
     );
 
@@ -105,6 +115,7 @@ class ComposerStaticInit5f84b1177b67fade37b18ae68cb61d35
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit5f84b1177b67fade37b18ae68cb61d35::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit5f84b1177b67fade37b18ae68cb61d35::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit5f84b1177b67fade37b18ae68cb61d35::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit5f84b1177b67fade37b18ae68cb61d35::$classMap;
 
         }, null, ClassLoader::class);
