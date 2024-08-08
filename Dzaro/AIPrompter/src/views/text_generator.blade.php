@@ -98,7 +98,49 @@
         height:100px;
         width:calc(70% + 37px);
         transition:height 0.3s ease-in-out;
+        display:flex;
+        justify-items:center;
     }
+
+    #responseDiv > p {
+        width:100%;
+        display:none;
+    }
+
+    #responseDiv #loadingContainer {
+        display:none;
+        justify-content: center;
+        align-items: center;
+        gap:7px;
+        width:100%;
+        height:100%;
+    }
+
+    #responseDiv #loadingContainer .loadingDot {
+        width:20px;
+        height:20px;
+        background-color:rgb(191, 191, 191);
+        border-radius: 50%;
+        opacity:0;
+        scale:50%;
+    }
+
+    #responseDiv #loadingContainer .loadingDot:nth-child(1) {
+        animation: loadingDot 1s ease-in-out infinite;
+        animation-delay: 0s;
+    }
+
+    #responseDiv #loadingContainer .loadingDot:nth-child(2) {
+        animation: loadingDot 1s ease-in-out infinite;
+        animation-delay: 0.25s;
+    }
+
+    #responseDiv #loadingContainer .loadingDot:nth-child(3) {
+        animation: loadingDot 1s ease-in-out infinite;
+        animation-delay: 0.5s;
+    }
+
+
 
     @property --myColor1 {
         syntax: '<color>';
@@ -110,6 +152,13 @@
         0% { transform: translate(0px, -8px); }
         50% { transform: translate(3px, -8px); }
         100% { transform: translate(0px, -8px); }
+    }
+
+    @keyframes loadingDot {
+        0% { opacity:0; scale:50% }
+        25% { opacity:1; scale:100% }
+        75% { opacity:0; scale:50% }
+        100% { opacity:0; scale:50% }
     }
 
     @media (max-width: 1600px) {
@@ -134,7 +183,14 @@
             <textarea id="promptInput" placeholder="Type something and watch magic happens..." oninput='if(this.scrollHeight < 300) {this.style.height = "";this.style.height = this.scrollHeight - 4 + "px"}'></textarea>
             <i onclick="askAI()" class="bi bi-arrow-right-short"></i>
         </div>
-        <div id="responseDiv"><p id="responseParagraph"></p></div> <!-- invisible div for making flex items position correctly, after asking AI it becomes container for AI response -->
+        <div id="responseDiv"> <!-- invisible div for making flex items position correctly, after asking AI it becomes container for AI response -->
+            <div id="loadingContainer">
+                <div class="loadingDot"></div>
+                <div class="loadingDot"></div>
+                <div class="loadingDot"></div>
+            </div>
+            <p id="responseParagraph"></p>
+        </div> 
     </div>
 
     <script>
@@ -145,6 +201,8 @@
         const promptInput = document.getElementById('promptInput');
         const titleWrapper = document.getElementById('titleWrapper')
         const title = document.querySelector('#titleWrapper h2');
+        const loadingContainer = document.getElementById('loadingContainer');
+        let isStyled = false;
         promptInput.addEventListener('keypress', listenForEnter);
 
         /* listening for enter in textarea */
@@ -155,25 +213,42 @@
             }
         }
 
-        /* send ajax with user prompt to laravel route and return AI response */
-        function askAI() {
-            /* some style... */
+        /* style container (remove title) when user give prompt the first time */
+        function styleContainer() {
             titleWrapper.style.gridTemplateRows = "0fr";
             title.style.opacity = 0;
             title.style.transform = "translateY(-100px)";
             responseDiv.style.height = "100%";
-            responseParagraph.textContent = "Asking AI...";
+
+            /* prevent askAI function to going into this function all over again */
+            isStyled = true;
+        }
+        
+        /* send ajax with user prompt to laravel route and return AI response */
+        function askAI() {
+            /* clear prompt after sending message */
+            let prompt = promptInput.value;
+            promptInput.value = "";
+
+            /* some style... */
+            if(!isStyled) {
+                styleContainer()
+            }
+            responseParagraph.style.display = "none";
+            loadingContainer.style.display = "flex";
+
             /* updating messages table */
             messages.push({
-                "content": promptInput.value,
+                "content": prompt,
                 "role": "user"
             })
             console.log(messages);
+
             /* the ajax itself */
             $.ajax({
                 type:'POST',
                 url:"{{ route('AIPrompter_generate_text') }}",
-                data:{prompt:promptInput.value, messages:messages},
+                data:{prompt:prompt, messages:messages},
                 success:function(data){
                     console.log(data.success);
                     /* updating messages table */
@@ -182,7 +257,9 @@
                         "role": "assistant"
                     })
                     /* display AI response */
-                    responseParagraph.textContent = data.success.content;
+                    loadingContainer.style.display = "none";
+                    responseParagraph.style.display = "block";
+                    responseParagraph.textContent = data.success.content; /*TODO format AI response for \n, ###, ** etc. */
                 }
             });
         }
