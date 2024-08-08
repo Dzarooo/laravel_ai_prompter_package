@@ -14,7 +14,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Dzaro\\AIPrompter\\ImageGeneratorProvider"
+                "Dzaro\\AIPrompter\\AIPrompterProvider"
             ]
         }
     },

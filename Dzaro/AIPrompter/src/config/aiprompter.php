@@ -10,6 +10,6 @@ return [
     | Your OPENAI API key.
     |
     */
-    'OPENAI_API_KEY' => 'write your API key here',
+    'openai_api_key' => 'write your API key here',
 
 ];
