@@ -96,6 +96,7 @@
     #responseDiv {
         min-height:100px;
         height:100px;
+        overflow-y: auto;
         width:calc(70% + 37px);
         transition:height 0.3s ease-in-out;
         display:flex;
@@ -140,7 +141,11 @@
         animation-delay: 0.5s;
     }
 
-
+    pre:has(code) {
+        background-color:rgb(224, 224, 224);
+        box-shadow:inset 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+        border-radius:5px;
+    }
 
     @property --myColor1 {
         syntax: '<color>';
@@ -189,7 +194,7 @@
                 <div class="loadingDot"></div>
                 <div class="loadingDot"></div>
             </div>
-            <p id="responseParagraph"></p>
+            <div id="responseParagraph"></div>
         </div> 
     </div>
 
@@ -259,7 +264,7 @@
                     /* display AI response */
                     loadingContainer.style.display = "none";
                     responseParagraph.style.display = "block";
-                    responseParagraph.textContent = data.success.content; /*TODO format AI response for \n, ###, ** etc. */
+                    responseParagraph.innerHTML = data.success.content; /*  TODO format AI response for \n, ###, ** etc. */
                 }
             });
         }
