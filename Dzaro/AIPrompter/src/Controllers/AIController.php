@@ -40,7 +40,6 @@ class AIController extends Controller {
         $imageSize = $request->imageSize;
         $imageSize = $imageSize."x".$imageSize;
         $imagesAmount = Intval($request->imagesAmount);
-        $storagePath = storage_path('app');
 
         $response = Http::withToken(Config::get('aiprompter.openai_api_key'))
         ->baseUrl('https://api.openai.com/v1')
@@ -52,7 +51,7 @@ class AIController extends Controller {
         ]);
 
         $data = $response->json();
-        return response()->json(['success'=>compact('data', 'storagePath')]);
+        return response()->json(['success'=>compact('data')]);
 
         // $data = [
         //     "data" => [
@@ -61,6 +60,6 @@ class AIController extends Controller {
         //         ]
         //     ]
         // ]; 
-        // return response()->json(['success'=>compact('data','storagePath')]);
+        // return response()->json(['success'=>compact('data')]);
     }
 }

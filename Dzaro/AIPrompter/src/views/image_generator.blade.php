@@ -211,25 +211,34 @@
     #responseDiv #responseDivSaveImages {
         width:100%;
         display:none;
-        gap:10px;
-        align-items:center;
     }
 
-    #responseDiv #responseDivSaveImages p {
+    #responseDiv #responseDivSaveImages #saveInputMainContainer {
+        width:100%;
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+
+    #responseDiv #responseDivSaveImages #saveInputMainContainer  {
+        text-align: end;
+    }
+
+    #responseDiv #responseDivSaveImages #saveInputMainContainer p {
         margin:0;
         padding:0;
         text-wrap:none;
         white-space:nowrap;
     }
 
-    #responseDiv #responseDivSaveImages #saveInputContainer {
+    #responseDiv #responseDivSaveImages #saveInputMainContainer #saveInputContainer {
         display:flex;
         align-items:center;
         width:100%;
         gap:10px;
     }
 
-    #responseDiv #responseDivSaveImages #saveInputContainer input {
+    #responseDiv #responseDivSaveImages #saveInputMainContainer #saveInputContainer input {
         appearance:none;
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -262,6 +271,13 @@
         cursor:pointer;
         animation: jump 0.5s;
         --myColor1: rgb(213, 213, 213);
+    }
+
+    #responseDiv #responseDivSaveImages #saveInputParagraph {
+        margin:0;
+        padding:0;
+        text-align:end;
+        margin-right:32px;
     }
 
     #responseDiv #responseDivImages {
@@ -361,11 +377,14 @@
                 <div class="loadingDot"></div>
             </div>
             <div id="responseDivSaveImages">
-                <p>Save images to storage: </p>
-                <div id="saveInputContainer">
-                    <input id="saveInput" type="text" placeholder="Path to folder where images will be saved">
-                    <i onclick="saveImages()" class="bi bi-download"></i>
+                <div id="saveInputMainContainer">
+                    <p>Save images to storage: </p>
+                    <div id="saveInputContainer">
+                        <input id="saveInput" type="text" placeholder="Path to folder where images will be saved" value="storage/app">
+                        <i onclick="saveImages()" class="bi bi-download"></i>
+                    </div>
                 </div>
+                <div><p id="saveInputParagraph"></p></div>
             </div>
             <div id="responseDivImages"></div>
         </div> 
@@ -386,6 +405,8 @@
         const responseDivImages = document.getElementById('responseDivImages');
         const responseDivSaveImages = document.getElementById('responseDivSaveImages');
         const responseDivSaveImagesInput = document.getElementById('saveInput');
+        const responseDIvSaveInputMainContainer = document.getElementById('saveInputMainContainer');
+        const responseDivSaveImagesParagraph = document.getElementById('saveInputParagraph');
 
         let isStyled = false;
         let imageSize = 256;
@@ -441,6 +462,8 @@
 
         function saveImages() {
             const storagePath = saveInput.value;
+            responseDivSaveImagesParagraph.style.color = "black";
+            responseDivSaveImagesParagraph.textContent = "Saving...";
 
             $.ajax({
                 type:'POST',
@@ -449,12 +472,18 @@
                 success:function(data) {
                     if(data.success) {
                         console.info("Images saved to: ", data);
+                        responseDivSaveImagesParagraph.style.color = "green";
+                        responseDivSaveImagesParagraph.textContent = "Images saved successfully.";
                     }
                     else {
+                        responseDivSaveImagesParagraph.style.color = "red";
+                        responseDivSaveImagesParagraph.textContent = "Error saving images. " + data.error;
                         console.error("Error saving images: ", data);
                     }
                 },
                 error:function(error) {
+                    responseDivSaveImagesParagraph.style.color = "red";
+                    responseDivSaveImagesParagraph.textContent = "Unexpected error occured. see console logs for more details.";
                     console.error("Error saving images: ", error);
                 }
             });
@@ -477,34 +506,50 @@
                 styleContainer()
             }
             responseDivImages.style.display = "none";
+            responseDivSaveImages.style.display = "none";
+            responseDivSaveImagesParagraph.textContent = ""
             loadingContainer.style.display = "flex";
 
             /* the ajax itself */
-            $.ajax({ /* TODO make ajax get error response */
+            $.ajax({
                 type:'POST',
                 url:"{{ route('AIPrompter_generate_images') }}",
                 data:{prompt:prompt, imageSize:imageSize, imagesAmount:imagesAmount},
                 success:function(data){
-                    /* displaying response data */
-                    console.log(data)
-                    console.info("images successfully obtained: ", data.success.data.data);
-                    console.info("path to save images: ", data.success.storagePath);
 
-                    /* putting storage path into saveInput */
-                    responseDivSaveImagesInput.value = data.success.storagePath;
+                    if(data.success.data.error) {
+                        loadingContainer.style.display = "none";
+                        responseDivImages.innerHTML = "";
+                        responseDivImages.style.display = "flex";
 
-                    /* displaying ai answer */
+                        console.error("An error occurred: ", data.success.data.error.message);
+                        responseDivImages.innerHTML = "<p style='color:red;'>An error occurred: " + data.success.data.error.message + "</p>";
+                    }
+                    else {
+                        /* displaying response data */
+                        console.log(data);
+                        console.info("images successfully obtained: ", data.success.data.data);
+
+                        /* displaying ai answer */
+                        loadingContainer.style.display = "none";
+                        responseDivImages.innerHTML = "";
+                        responseDivImages.style.display = "flex";
+                        responseDivSaveImages.style.display = "block";
+                        
+                        let response = data.success.data.data;
+                        Array.from(response).forEach((image) => {
+                            responseDivImages.innerHTML += `<img src="${image.url}" alt="AI generated image" style="width:256px;height:256px;">`;
+                            images.push(image.url);
+                        })
+                    }
+                },
+                error:function(error) {
                     loadingContainer.style.display = "none";
                     responseDivImages.innerHTML = "";
                     responseDivImages.style.display = "flex";
-                    responseDivSaveImages.style.display = "flex";
-                    
-                    let response = data.success.data.data;
-                    Array.from(response).forEach((image) => {
-                        responseDivImages.innerHTML += `<img src="${image.url}" alt="AI generated image" style="width:256px;height:256px;">`;
-                        images.push(image.url);
-                    })
 
+                    console.error("Unexpected error occurred: ", error);
+                    responseDivImages.innerHTML = "<p style='color:red;'>An unexpected error occurred while generating images. Please try again later.</p>";
                 }
             });
         }
