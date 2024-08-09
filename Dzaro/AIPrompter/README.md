@@ -1,6 +1,9 @@
-# How to config the package
+# How to configure the package
 
-Firstly place package in given directory: `packages/Dzaro/ImageGenerator`.<br>
+_Note: Package was created on Laravel 11 and this tutorial follows Laravel 11. Configuration steps may vary depending on Laravel version and package may not work properly on older versions._
+
+Firstly place package in given directory: `packages/Dzaro/AIPrompter`.
+
 then, go to composer.json and add this block of code to your repositories section:
 
 ```php
@@ -35,6 +38,12 @@ then, run in terminal of your project following command:
 composer install
 ```
 
+To be sure that package has installed, you can also run this command (not necessary):
+
+```
+composer update dzaro/ai_prompter
+```
+
 After that, make sure you have added provider in `bootstrap/providers.php` as shown below:
 
 ```php
@@ -52,13 +61,13 @@ Before you can use the package, you need to add your OpenAI API key to the confi
 php artisan vendor:publish
 ```
 
-After that, go to config file (`config/image_generator.php`), find line with OPENAI_API_KEY and set its value to you API key:
+After that, go to config file (`config/aiprompter.php`), find line with `openai_api_key` and set its value to you API key:
 ```php
-//config/image_generator.php
+//config/aiprompter.php
 
-OPENAI_API_KEY = { your API key goes here }
+openai_api_key = { your API key goes here }
 ```
-More informations about how to get OpenAI API key can be found [there](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
+More informations about how to get OpenAI API key can be found [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
 
 
 # How to use the package
