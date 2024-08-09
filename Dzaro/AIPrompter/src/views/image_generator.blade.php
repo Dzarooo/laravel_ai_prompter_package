@@ -32,7 +32,7 @@
         display: grid;
         grid-template-rows: 1fr;
         overflow: hidden;
-        transition: all 0.3s;
+        transition: all 0.3s ease-out;
         position: relative;
     }
 
@@ -49,9 +49,8 @@
         width:70%;
         text-align: center;
         height:100px;
-        transition: all 0.3 ease-in-out;
         font-size: clamp(20px, 30px, 1.5vw);
-        transition: opacity 0.2s, transform 0.5s;
+        transition: opacity 0.2s ease-in-out, transform 0.5s ease-in-out;
     }
 
     #mainContainer > #inputMainContainer {
@@ -383,12 +382,11 @@
             loadingContainer.style.display = "flex";
 
             /* the ajax itself */
-            $.ajax({
+            /* $.ajax({
                 type:'POST',
                 url:"{{ route('AIPrompter_generate_images') }}",
                 data:{prompt:prompt, imageSize:imageSize, imagesAmount:imagesAmount},
                 success:function(data){
-                    /* display AI response */
                     loadingContainer.style.display = "none";
                     responseDivImages.innerHTML = "";
                     responseDivImages.style.display = "flex";
@@ -400,7 +398,7 @@
                     })
 
                 }
-            });
+            }); */
         }
 
         </script>
