@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
 use Parsedown;
 
 class AIController extends Controller {
@@ -39,7 +40,7 @@ class AIController extends Controller {
         $imageSize = $request->imageSize;
         $imageSize = $imageSize."x".$imageSize;
         $imagesAmount = Intval($request->imagesAmount);
-
+        $storagePath = storage_path('app');
 
         $response = Http::withToken(Config::get('aiprompter.openai_api_key'))
         ->baseUrl('https://api.openai.com/v1')
@@ -51,8 +52,15 @@ class AIController extends Controller {
         ]);
 
         $data = $response->json();
-        return response()->json(['success'=>$data]);
+        return response()->json(['success'=>compact('data', 'storagePath')]);
 
-        //return response()->json(['success'=>compact('prompt','imageSize','imagesAmount')]);
+        // $data = [
+        //     "data" => [
+        //         [
+        //             "url" => "https://i.insider.com/602ee9ced3ad27001837f2ac?width=700",
+        //         ]
+        //     ]
+        // ]; 
+        // return response()->json(['success'=>compact('data','storagePath')]);
     }
 }

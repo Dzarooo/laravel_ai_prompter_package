@@ -95,7 +95,7 @@
     
     #mainContainer > #inputMainContainer > #inputContainer > i:hover {
         cursor:pointer;
-        animation:jump 0.5s;
+        animation:slideRight 0.5s;
         --myColor1: rgb(213, 213, 213);
     }
 
@@ -158,14 +158,16 @@
         transition: background-color 0.1s ease-in-out;
     }
 
-    #responseDiv {
+    #responseDiv { /* TODO style scrollbar */
         min-height:100px;
         height:100px;
         overflow-y:auto;
-        width:calc(70% + 37px);
+        width:70%;
         transition:height 0.3s ease-in-out;
         display:flex;
-        justify-items:center;
+        flex-direction: column;
+        align-items:center;
+        gap:50px;
     }
 
     #responseDiv > p {
@@ -206,6 +208,62 @@
         animation-delay: 0.5s;
     }
 
+    #responseDiv #responseDivSaveImages {
+        width:100%;
+        display:none;
+        gap:10px;
+        align-items:center;
+    }
+
+    #responseDiv #responseDivSaveImages p {
+        margin:0;
+        padding:0;
+        text-wrap:none;
+        white-space:nowrap;
+    }
+
+    #responseDiv #responseDivSaveImages #saveInputContainer {
+        display:flex;
+        align-items:center;
+        width:100%;
+        gap:10px;
+    }
+
+    #responseDiv #responseDivSaveImages #saveInputContainer input {
+        appearance:none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        font-family:monospace;
+        background-color: transparent;
+        width:100%;
+        border:solid;
+        border-color:transparent;
+        border-bottom-color:grey;
+        border-bottom-width:1px;
+        min-height:30px;
+        font-size: clamp(10px, 15px, 1vw);
+        outline:none;
+        font-weight:300;
+        resize: none;
+    }
+
+    #responseDiv #responseDivSaveImages #saveInputContainer i {
+        font-size:20px;
+        -webkit-text-stroke:0.4px;
+        background-image: radial-gradient(
+            circle at center,
+            var(--myColor1) 0,
+            transparent 60%
+        );
+        transition: --myColor1 0.1s;
+    }
+
+    #responseDiv #responseDivSaveImages #saveInputContainer i:hover {
+        cursor:pointer;
+        animation: jump 0.5s;
+        --myColor1: rgb(213, 213, 213);
+    }
+
     #responseDiv #responseDivImages {
         width:100%;
         display:flex;
@@ -239,6 +297,12 @@
     }
 
     @keyframes jump {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-3px); }
+        100% { transform: translateY(0px); }
+    }
+
+    @keyframes slideRight {
         0% { transform: translate(0px, -8px); }
         50% { transform: translate(3px, -8px); }
         100% { transform: translate(0px, -8px); }
@@ -296,6 +360,13 @@
                 <div class="loadingDot"></div>
                 <div class="loadingDot"></div>
             </div>
+            <div id="responseDivSaveImages">
+                <p>Save images to storage: </p>
+                <div id="saveInputContainer">
+                    <input id="saveInput" type="text" placeholder="Path to folder where images will be saved">
+                    <i onclick="saveImages()" class="bi bi-download"></i>
+                </div>
+            </div>
             <div id="responseDivImages"></div>
         </div> 
     </div>
@@ -303,17 +374,23 @@
     <script>
 
         /* all variables in script */
-        const responseDiv = document.getElementById('responseDiv');
-        const responseDivImages = document.getElementById('responseDivImages');
-        const promptInput = document.getElementById('promptInput');
-        const titleWrapper = document.getElementById('titleWrapper')
+        const titleWrapper = document.getElementById('titleWrapper');
         const title = document.querySelector('#titleWrapper h2');
+
+        const promptInput = document.getElementById('promptInput');
         const loadingContainer = document.getElementById('loadingContainer');
         const sizeOptions = document.getElementsByClassName('sizeOption');
         const imagesAmountInput = document.getElementById('imagesAmount');
+
+        const responseDiv = document.getElementById('responseDiv');
+        const responseDivImages = document.getElementById('responseDivImages');
+        const responseDivSaveImages = document.getElementById('responseDivSaveImages');
+        const responseDivSaveImagesInput = document.getElementById('saveInput');
+
         let isStyled = false;
         let imageSize = 256;
         let imagesAmount = 1;
+        let images = [];
 
         /* add event listeners */
         promptInput.addEventListener('keypress', listenForEnter);
@@ -361,6 +438,27 @@
             /* prevent askAI function to going into this function all over again */
             isStyled = true;
         }
+
+        function saveImages() {
+            const storagePath = saveInput.value;
+
+            $.ajax({
+                type:'POST',
+                url:'{{ route("AIPrompter_save_images") }}',
+                data:{storagePath:storagePath,images:images},
+                success:function(data) {
+                    if(data.success) {
+                        console.info("Images saved to: ", data);
+                    }
+                    else {
+                        console.error("Error saving images: ", data);
+                    }
+                },
+                error:function(error) {
+                    console.error("Error saving images: ", error);
+                }
+            });
+        }
         
         /* send ajax with user prompt to laravel route and return AI response */
         function askAI() {
@@ -382,23 +480,33 @@
             loadingContainer.style.display = "flex";
 
             /* the ajax itself */
-            /* $.ajax({
+            $.ajax({ /* TODO make ajax get error response */
                 type:'POST',
                 url:"{{ route('AIPrompter_generate_images') }}",
                 data:{prompt:prompt, imageSize:imageSize, imagesAmount:imagesAmount},
                 success:function(data){
+                    /* displaying response data */
+                    console.log(data)
+                    console.info("images successfully obtained: ", data.success.data.data);
+                    console.info("path to save images: ", data.success.storagePath);
+
+                    /* putting storage path into saveInput */
+                    responseDivSaveImagesInput.value = data.success.storagePath;
+
+                    /* displaying ai answer */
                     loadingContainer.style.display = "none";
                     responseDivImages.innerHTML = "";
                     responseDivImages.style.display = "flex";
+                    responseDivSaveImages.style.display = "flex";
                     
-                    console.info("images successfully obtained: ", data.success.data);
-                    let response = data.success.data;
+                    let response = data.success.data.data;
                     Array.from(response).forEach((image) => {
                         responseDivImages.innerHTML += `<img src="${image.url}" alt="AI generated image" style="width:256px;height:256px;">`;
+                        images.push(image.url);
                     })
 
                 }
-            }); */
+            });
         }
 
         </script>

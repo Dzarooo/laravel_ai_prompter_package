@@ -88,11 +88,11 @@
     
     #mainContainer > #inputContainer > i:hover {
         cursor:pointer;
-        animation:jump 0.5s;
+        animation:slideRight 0.5s;
         --myColor1: rgb(213, 213, 213);
     }
 
-    #responseDiv {
+    #responseDiv { /* TODO style scrollbar */
         min-height:100px;
         height:100px;
         overflow-y: auto;
@@ -152,7 +152,7 @@
         inherits: false;
     }
 
-    @keyframes jump {
+    @keyframes slideRight {
         0% { transform: translate(0px, -8px); }
         50% { transform: translate(3px, -8px); }
         100% { transform: translate(0px, -8px); }
@@ -246,24 +246,27 @@
                 "content": prompt,
                 "role": "user"
             })
-            console.log(messages);
+            console.info("messages: ", messages);
 
             /* the ajax itself */
-            $.ajax({
+            $.ajax({ /* TODO make ajax get error response */
                 type:'POST',
                 url:"{{ route('AIPrompter_generate_text') }}",
                 data:{prompt:prompt, messages:messages},
                 success:function(data){
-                    console.log(data.success);
+                    console.info("text successfully obtained: ", data.success);
+
                     /* updating messages table */
                     messages.push({
                         "content": data.success.content,
                         "role": "assistant"
                     })
+                    console.info("messages: ", messages);
+
                     /* display AI response */
                     loadingContainer.style.display = "none";
                     responseParagraph.style.display = "block";
-                    responseParagraph.innerHTML = data.success.content; /*  TODO format AI response for \n, ###, ** etc. */
+                    responseParagraph.innerHTML = data.success.content;
                 }
             });
         }
