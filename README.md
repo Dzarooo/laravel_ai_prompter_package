@@ -1,6 +1,18 @@
+> [!IMPORTANT]
+> Package requires OpenAI API key to work. Informations about how to get OpenAI API key can be found [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key).
+
+# About the package
+
+_Laravel AI Prompter_ is a package that provides 2 new routes allowing to generate images and text using OpenAI' artificial intelligence:
+- `/text_generator` - chat with OpenAI' ChatGPT,
+- `/image_generator` - generate images in different quantities and different qualities based on user prompt.
+
+The goal of the package is to make access to AI in laravel projects easier. Clean code allows programmers to understand how OpenAI API works on real working example, so they can start working with AI on their own a lot faster.
+
 # How to configure the package
 
-_Note: Package was created on Laravel 11 and this tutorial follows Laravel 11. Configuration steps may vary depending on Laravel version and package may not work properly on older versions._
+> [!NOTE]
+> Package was created on Laravel 11 and this tutorial follows Laravel 11. Configuration steps may vary depending on Laravel version and package may not work properly on older versions.
 
 Firstly place package in given directory: `packages/Dzaro/AIPrompter`.
 
@@ -67,7 +79,7 @@ After that, go to config file (`config/aiprompter.php`), find line with `openai_
 
 openai_api_key = { your API key goes here }
 ```
-More informations about how to get OpenAI API key can be found [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
+More informations about how to get OpenAI API key can be found [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key).
 
 
 # How to use the package
